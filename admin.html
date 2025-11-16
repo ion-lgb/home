@@ -50,20 +50,34 @@
             <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">实时同步到首页</p>
             <h1 class="text-3xl font-semibold">个人简历内容管理</h1>
           </div>
-          <div class="flex gap-3">
-            <a
-              class="inline-flex items-center rounded-full border border-slate-200/60 px-6 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-1 dark:border-white/10 dark:text-white"
-              href="index.html"
-              >返回主页</a
-            >
-            <button
-              id="resetButton"
-              type="button"
-              class="inline-flex items-center rounded-full bg-gradient-to-r from-rose-500 to-orange-400 px-6 py-2 text-sm font-semibold text-white shadow-lg transition hover:shadow-xl"
-            >
-              恢复默认
-            </button>
-          </div>
+        <div class="flex flex-wrap gap-3">
+          <a
+            class="inline-flex items-center rounded-full border border-slate-200/60 px-6 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-1 dark:border-white/10 dark:text-white"
+            href="index.html"
+            >返回主页</a
+          >
+          <button
+            id="exportButton"
+            type="button"
+            class="inline-flex items-center rounded-full border border-slate-200/60 px-6 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-1 dark:border-white/10 dark:text-white"
+          >
+            导出 JSON
+          </button>
+          <button
+            id="importButton"
+            type="button"
+            class="inline-flex items-center rounded-full border border-slate-200/60 px-6 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-1 dark:border-white/10 dark:text-white"
+          >
+            导入 JSON
+          </button>
+          <button
+            id="resetButton"
+            type="button"
+            class="inline-flex items-center rounded-full bg-gradient-to-r from-rose-500 to-orange-400 px-6 py-2 text-sm font-semibold text-white shadow-lg transition hover:shadow-xl"
+          >
+            恢复默认
+          </button>
+        </div>
         </div>
       </header>
 

@@ -16,7 +16,9 @@ let activeTab = tabs[0].id;
 const dom = {
   tabs: document.getElementById("tabs"),
   panel: document.getElementById("panelContent"),
-  reset: document.getElementById("resetButton")
+  reset: document.getElementById("resetButton"),
+  exportBtn: document.getElementById("exportButton"),
+  importBtn: document.getElementById("importButton")
 };
 
 function persist() {
@@ -39,20 +41,73 @@ function createInput(label, value, { multiline = false, type = "text", onChange,
   return wrapper;
 }
 
-function createGroup(title) {
-  const group = document.createElement("section");
-  group.className =
+function createGroup(title, { defaultOpen = true } = {}) {
+  const section = document.createElement("section");
+  section.className =
     "rounded-3xl border border-slate-200/60 bg-white/80 p-6 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/70";
-  const heading = document.createElement("h3");
-  heading.textContent = title;
-  heading.className = "text-xl font-semibold text-slate-900 dark:text-white mb-4";
-  group.appendChild(heading);
-  return group;
+  const header = document.createElement("button");
+  header.type = "button";
+  header.className =
+    "flex w-full items-center justify-between gap-3 text-left text-xl font-semibold text-slate-900 dark:text-white";
+  const label = document.createElement("span");
+  label.textContent = title;
+  const indicator = document.createElement("span");
+  indicator.className = "text-sm font-medium text-slate-500";
+  header.append(label, indicator);
+  const body = document.createElement("div");
+  body.className = "mt-4 space-y-4";
+
+  let open = defaultOpen;
+  const sync = () => {
+    indicator.textContent = open ? "收起" : "展开";
+    body.hidden = !open;
+    section.dataset.open = open ? "true" : "false";
+  };
+  header.addEventListener("click", () => {
+    open = !open;
+    sync();
+  });
+  sync();
+
+  section.append(header, body);
+  return { section, body, setOpen: (value) => ((open = value), sync()) };
+}
+
+function moveItem(list, from, to) {
+  if (to < 0 || to >= list.length) return;
+  const [item] = list.splice(from, 1);
+  list.splice(to, 0, item);
+}
+
+function createEntryActions({ index, total, onRemove, onMove }) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex justify-end gap-2 pt-3";
+
+  const createBtn = (label, handler, disabled) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = label;
+    btn.disabled = disabled;
+    btn.className = [
+      "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-xs font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white",
+      disabled ? "opacity-50 cursor-not-allowed" : ""
+    ].join(" ");
+    if (!disabled) btn.addEventListener("click", handler);
+    return btn;
+  };
+
+  wrapper.append(
+    createBtn("↑ 上移", () => onMove(index - 1), index === 0),
+    createBtn("↓ 下移", () => onMove(index + 1), index === total - 1),
+    createBtn("✕ 删除", onRemove, false)
+  );
+
+  return wrapper;
 }
 
 function renderHeroPanel() {
-  const group = createGroup("主视觉");
-  group.append(
+  const heroGroup = createGroup("主视觉");
+  heroGroup.body.append(
     createInput("标题", content.hero.title, {
       onChange: (value) => {
         content.hero.title = value;
@@ -76,7 +131,7 @@ function renderHeroPanel() {
   );
 
   const statusGroup = createGroup("焦点状态卡");
-  statusGroup.append(
+  statusGroup.body.append(
     createInput("标题", content.hero.status.title, {
       onChange: (value) => {
         content.hero.status.title = value;
@@ -98,13 +153,13 @@ function renderHeroPanel() {
     })
   );
 
-  dom.panel.replaceChildren(group, statusGroup);
+  dom.panel.replaceChildren(heroGroup.section, statusGroup.section);
 }
 
 function makeRepeater(items, factory, addItem) {
   const container = document.createElement("div");
   container.className = "space-y-4";
-  items.forEach((item, index) => container.appendChild(factory(item, index)));
+  items.forEach((item, index) => container.appendChild(factory(item, index, items)));
 
   const actions = document.createElement("div");
   actions.className = "flex justify-end gap-3 pt-2";
@@ -123,7 +178,7 @@ function renderStatsPanel() {
   const group = createGroup("核心指标");
   const repeater = makeRepeater(
     content.stats,
-    (stat, index) => {
+    (stat, index, list) => {
       const item = document.createElement("article");
       item.className =
         "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
@@ -148,17 +203,22 @@ function renderStatsPanel() {
           }
         })
       );
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "删除";
-      remove.className =
-        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
-      remove.addEventListener("click", () => {
-        content.stats.splice(index, 1);
-        persist();
-        renderStatsPanel();
-      });
-      item.appendChild(remove);
+      item.appendChild(
+        createEntryActions({
+          index,
+          total: list.length,
+          onRemove: () => {
+            content.stats.splice(index, 1);
+            persist();
+            renderStatsPanel();
+          },
+          onMove: (nextIndex) => {
+            moveItem(content.stats, index, nextIndex);
+            persist();
+            renderStatsPanel();
+          }
+        })
+      );
       return item;
     },
     () => {
@@ -167,15 +227,15 @@ function renderStatsPanel() {
       renderStatsPanel();
     }
   );
-  group.appendChild(repeater);
-  dom.panel.replaceChildren(group);
+  group.body.appendChild(repeater);
+  dom.panel.replaceChildren(group.section);
 }
 
 function renderSkillsPanel() {
   const group = createGroup("能力矩阵");
   const repeater = makeRepeater(
     content.skills,
-    (skill, index) => {
+    (skill, index, list) => {
       const item = document.createElement("article");
       item.className =
         "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
@@ -208,17 +268,22 @@ function renderSkillsPanel() {
           }
         })
       );
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "删除";
-      remove.className =
-        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
-      remove.addEventListener("click", () => {
-        content.skills.splice(index, 1);
-        persist();
-        renderSkillsPanel();
-      });
-      item.appendChild(remove);
+      item.appendChild(
+        createEntryActions({
+          index,
+          total: list.length,
+          onRemove: () => {
+            content.skills.splice(index, 1);
+            persist();
+            renderSkillsPanel();
+          },
+          onMove: (nextIndex) => {
+            moveItem(content.skills, index, nextIndex);
+            persist();
+            renderSkillsPanel();
+          }
+        })
+      );
       return item;
     },
     () => {
@@ -227,15 +292,15 @@ function renderSkillsPanel() {
       renderSkillsPanel();
     }
   );
-  group.appendChild(repeater);
-  dom.panel.replaceChildren(group);
+  group.body.appendChild(repeater);
+  dom.panel.replaceChildren(group.section);
 }
 
 function renderTimelinePanel() {
   const group = createGroup("经历");
   const repeater = makeRepeater(
     content.timeline,
-    (timeline, index) => {
+    (timeline, index, list) => {
       const item = document.createElement("article");
       item.className =
         "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
@@ -260,17 +325,22 @@ function renderTimelinePanel() {
           }
         })
       );
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "删除";
-      remove.className =
-        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
-      remove.addEventListener("click", () => {
-        content.timeline.splice(index, 1);
-        persist();
-        renderTimelinePanel();
-      });
-      item.appendChild(remove);
+      item.appendChild(
+        createEntryActions({
+          index,
+          total: list.length,
+          onRemove: () => {
+            content.timeline.splice(index, 1);
+            persist();
+            renderTimelinePanel();
+          },
+          onMove: (nextIndex) => {
+            moveItem(content.timeline, index, nextIndex);
+            persist();
+            renderTimelinePanel();
+          }
+        })
+      );
       return item;
     },
     () => {
@@ -279,15 +349,15 @@ function renderTimelinePanel() {
       renderTimelinePanel();
     }
   );
-  group.appendChild(repeater);
-  dom.panel.replaceChildren(group);
+  group.body.appendChild(repeater);
+  dom.panel.replaceChildren(group.section);
 }
 
 function renderProjectsPanel() {
   const group = createGroup("项目案例");
   const repeater = makeRepeater(
     content.projects,
-    (project, index) => {
+    (project, index, list) => {
       const item = document.createElement("article");
       item.className =
         "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
@@ -324,17 +394,22 @@ function renderProjectsPanel() {
           }
         })
       );
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "删除";
-      remove.className =
-        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
-      remove.addEventListener("click", () => {
-        content.projects.splice(index, 1);
-        persist();
-        renderProjectsPanel();
-      });
-      item.appendChild(remove);
+      item.appendChild(
+        createEntryActions({
+          index,
+          total: list.length,
+          onRemove: () => {
+            content.projects.splice(index, 1);
+            persist();
+            renderProjectsPanel();
+          },
+          onMove: (nextIndex) => {
+            moveItem(content.projects, index, nextIndex);
+            persist();
+            renderProjectsPanel();
+          }
+        })
+      );
       return item;
     },
     () => {
@@ -343,15 +418,15 @@ function renderProjectsPanel() {
       renderProjectsPanel();
     }
   );
-  group.appendChild(repeater);
-  dom.panel.replaceChildren(group);
+  group.body.appendChild(repeater);
+  dom.panel.replaceChildren(group.section);
 }
 
 function renderArticlesPanel() {
   const group = createGroup("文章输出");
   const repeater = makeRepeater(
     content.articles,
-    (article, index) => {
+    (article, index, list) => {
       const item = document.createElement("article");
       item.className =
         "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
@@ -376,17 +451,22 @@ function renderArticlesPanel() {
           }
         })
       );
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "删除";
-      remove.className =
-        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
-      remove.addEventListener("click", () => {
-        content.articles.splice(index, 1);
-        persist();
-        renderArticlesPanel();
-      });
-      item.appendChild(remove);
+      item.appendChild(
+        createEntryActions({
+          index,
+          total: list.length,
+          onRemove: () => {
+            content.articles.splice(index, 1);
+            persist();
+            renderArticlesPanel();
+          },
+          onMove: (nextIndex) => {
+            moveItem(content.articles, index, nextIndex);
+            persist();
+            renderArticlesPanel();
+          }
+        })
+      );
       return item;
     },
     () => {
@@ -395,13 +475,13 @@ function renderArticlesPanel() {
       renderArticlesPanel();
     }
   );
-  group.appendChild(repeater);
-  dom.panel.replaceChildren(group);
+  group.body.appendChild(repeater);
+  dom.panel.replaceChildren(group.section);
 }
 
 function renderContactPanel() {
   const group = createGroup("联系方式");
-  group.append(
+  group.body.append(
     createInput("城市", content.contact.city, {
       onChange: (value) => {
         content.contact.city = value;
@@ -432,7 +512,7 @@ function renderContactPanel() {
   const socialGroup = createGroup("社交媒体");
   const socialRepeater = makeRepeater(
     content.contact.socials,
-    (social, index) => {
+    (social, index, list) => {
       const article = document.createElement("article");
       article.className =
         "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
@@ -456,17 +536,22 @@ function renderContactPanel() {
           }
         })
       );
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "删除";
-      remove.className =
-        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
-      remove.addEventListener("click", () => {
-        content.contact.socials.splice(index, 1);
-        persist();
-        renderContactPanel();
-      });
-      article.appendChild(remove);
+      article.appendChild(
+        createEntryActions({
+          index,
+          total: list.length,
+          onRemove: () => {
+            content.contact.socials.splice(index, 1);
+            persist();
+            renderContactPanel();
+          },
+          onMove: (nextIndex) => {
+            moveItem(content.contact.socials, index, nextIndex);
+            persist();
+            renderContactPanel();
+          }
+        })
+      );
       return article;
     },
     () => {
@@ -476,9 +561,9 @@ function renderContactPanel() {
     }
   );
 
-  socialGroup.appendChild(socialRepeater);
+  socialGroup.body.appendChild(socialRepeater);
 
-  dom.panel.replaceChildren(group, socialGroup);
+  dom.panel.replaceChildren(group.section, socialGroup.section);
 }
 
 function renderTabs() {
@@ -523,6 +608,36 @@ dom.reset.addEventListener("click", () => {
   persist();
   renderPanel();
 });
+
+function exportContent() {
+  const data = JSON.stringify(content, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "portfolio-content.json";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function importContentFlow() {
+  const raw = window.prompt("粘贴 JSON 内容，或留空取消：", JSON.stringify(content, null, 2));
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    saveContent(parsed);
+    content = getContent();
+    renderPanel();
+    alert("导入成功，已同步到本地存储。");
+  } catch (err) {
+    alert("导入失败，请确认 JSON 格式正确。");
+  }
+}
+
+dom.exportBtn.addEventListener("click", exportContent);
+dom.importBtn.addEventListener("click", importContentFlow);
 
 renderTabs();
 renderPanel();
