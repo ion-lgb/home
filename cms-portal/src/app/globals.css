@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+a {
+  color: inherit;
+}
+
+body {
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(251, 146, 60, 0.14), transparent 45%), #f5f5f7;
+  color: #050505;
+}
+
+
+.hero-shot img {
+  transition: transform 0.8s ease;
+}
+
+.hero-shot:hover img {
+  transform: scale(1.05);
+}
