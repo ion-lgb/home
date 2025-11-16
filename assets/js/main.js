@@ -20,49 +20,57 @@ const dom = {
 };
 
 const content = getContent();
-
 const safe = (value) => (Array.isArray(value) ? value : []);
+
+const cardShell =
+  "glass-panel rounded-3xl border border-white/60 dark:border-white/10 p-6 shadow-xl transition hover:-translate-y-1 hover:shadow-2xl";
+const pillClass =
+  "inline-flex items-center rounded-full border border-white/40 bg-white/80 px-4 py-1 text-sm font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-800/70 dark:text-slate-100";
 
 function createStatCard(stat) {
   const card = document.createElement("article");
-  card.className = "card";
+  card.className = `${cardShell} flex flex-col gap-2`;
   card.dataset.reveal = "false";
   card.innerHTML = `
-    <p class="eyebrow">${stat.title}</p>
-    <p class="stat-value">${stat.value}</p>
-    <p class="muted">${stat.desc}</p>
+    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">${stat.title}</p>
+    <p class="text-4xl font-semibold text-slate-900 dark:text-white">${stat.value}</p>
+    <p class="text-base text-slate-500 dark:text-slate-300">${stat.desc}</p>
   `;
   return card;
 }
 
 function createSkillCard(skill) {
+  const highlights = safe(skill.highlights)
+    .map((tag) => `<span class="${pillClass} bg-slate-100/60 dark:bg-slate-800">${tag}</span>`)
+    .join("\n");
   const card = document.createElement("article");
-  card.className = "skill-card";
+  card.className = `${cardShell} flex flex-col gap-4`;
   card.dataset.reveal = "false";
-  const highlights = skill.highlights.map((tag) => `<span>${tag}</span>`).join("\n");
   card.innerHTML = `
     <div>
-      <p class="eyebrow">能力指数</p>
-      <h3>${skill.title}</h3>
-      <p class="muted">${skill.desc}</p>
+      <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">能力指数</p>
+      <h3 class="text-xl font-semibold">${skill.title}</h3>
+      <p class="text-slate-500 dark:text-slate-300">${skill.desc}</p>
     </div>
-    <div class="skill-card__meter"><span style="width:${skill.score}%"></span></div>
-    <div class="hero__tags">${highlights}</div>
+    <div class="h-2 rounded-full bg-slate-200/60 dark:bg-slate-800/70">
+      <span class="block h-full rounded-full bg-gradient-to-r from-brand-500 via-indigo-400 to-accent-500" style="width:${skill.score}%"></span>
+    </div>
+    <div class="flex flex-wrap gap-2 text-sm">${highlights}</div>
   `;
   return card;
 }
 
 function createTimelineItem(item) {
   const container = document.createElement("article");
-  container.className = "timeline__item";
+  container.className = `${cardShell} grid gap-4 md:grid-cols-[140px,1fr]`;
   container.dataset.reveal = "false";
   container.innerHTML = `
     <div>
-      <p class="eyebrow">${item.period}</p>
+      <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">${item.period}</p>
     </div>
     <div>
-      <h3>${item.role}</h3>
-      <p class="muted">${item.detail}</p>
+      <h3 class="text-xl font-semibold">${item.role}</h3>
+      <p class="text-slate-500 dark:text-slate-300">${item.detail}</p>
     </div>
   `;
   return container;
@@ -70,31 +78,36 @@ function createTimelineItem(item) {
 
 function createProjectCard(project) {
   const card = document.createElement("article");
-  card.className = "project-card";
+  card.className = `${cardShell} cursor-pointer`;
   card.dataset.reveal = "false";
   card.innerHTML = `
-    <div class="eyebrow">${project.metrics}</div>
-    <h3>${project.name}</h3>
-    <p class="muted">${project.desc}</p>
-    <div class="project-card__tech">
-      ${project.tech.map((t) => `<span>${t}</span>`).join("\n")}
+    <div class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">${project.metrics}</div>
+    <h3 class="mt-2 text-2xl font-semibold">${project.name}</h3>
+    <p class="mt-2 text-slate-500 dark:text-slate-300">${project.desc}</p>
+    <div class="mt-4 flex flex-wrap gap-2 text-sm">
+      ${project.tech
+        .map(
+          (t) =>
+            `<span class="rounded-full bg-slate-100/70 px-3 py-1 text-slate-600 dark:bg-slate-800/80 dark:text-slate-200">${t}</span>`
+        )
+        .join("\n")}
     </div>
   `;
   card.addEventListener("click", () => {
-    window.open(project.link, "_blank");
+    if (project.link) window.open(project.link, "_blank");
   });
   return card;
 }
 
 function createArticleCard(article) {
   const card = document.createElement("article");
-  card.className = "article-card";
+  card.className = `${cardShell} space-y-3`;
   card.dataset.reveal = "false";
   card.innerHTML = `
-    <p class="eyebrow">INSIGHT</p>
-    <h3>${article.title}</h3>
-    <p class="muted">${article.summary}</p>
-    <a href="${article.link}" target="_blank">阅读全文 →</a>
+    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">INSIGHT</p>
+    <h3 class="text-xl font-semibold">${article.title}</h3>
+    <p class="text-slate-500 dark:text-slate-300">${article.summary}</p>
+    <a class="inline-flex items-center text-brand-600 hover:text-brand-500" href="${article.link}" target="_blank" rel="noopener">阅读全文 →</a>
   `;
   return card;
 }
@@ -104,19 +117,29 @@ function renderContact(contactRaw) {
   dom.contactInfo.dataset.reveal = "false";
   const socials = safe(contact.socials);
   dom.contactInfo.innerHTML = `
-    <p class="eyebrow">Base</p>
-    <h3>${contact.city || ""}</h3>
-    <ul class="contact-list">
-      <li><span>Mail</span><a href="mailto:${contact.email || ""}">${contact.email || ""}</a></li>
-      <li><span>WeChat</span><em>${contact.wechat || ""}</em></li>
-      <li><span>预约沟通</span><a target="_blank" href="${contact.calendly || "#"}">${contact.calendly || ""}</a></li>
+    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Base</p>
+    <h3 class="text-2xl font-semibold">${contact.city || ""}</h3>
+    <div class="space-y-3 text-sm">
+      <div class="flex items-center justify-between gap-4">
+        <span class="text-slate-500">Mail</span><a class="font-semibold text-brand-600" href="mailto:${contact.email || ""}">${contact.email || ""}</a>
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <span class="text-slate-500">WeChat</span><span class="font-semibold">${contact.wechat || ""}</span>
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <span class="text-slate-500">预约沟通</span><a class="font-semibold text-brand-600" target="_blank" href="${contact.calendly || "#"}">${contact.calendly || ""}</a>
+      </div>
       ${socials
         .map(
-          (item) =>
-            `<li><span>${item.label}</span><a target="_blank" href="${item.url}">${item.handle}</a></li>`
+          (item) => `
+            <div class="flex items-center justify-between gap-4">
+              <span class="text-slate-500">${item.label}</span>
+              <a class="font-semibold text-brand-600" target="_blank" href="${item.url}">${item.handle}</a>
+            </div>
+          `
         )
         .join("")}
-    </ul>
+    </div>
   `;
 }
 
@@ -124,13 +147,15 @@ function initHero(hero) {
   const heroTitle = hero.title || "你好，我是Guobin";
   const tags = safe(hero.tags);
   const status = hero.status || { title: "Focus", desc: "", location: "" };
-  dom.heroTitle.innerHTML = heroTitle.replace("Hi", '<span class="accent">Hi</span>');
+  dom.heroTitle.innerHTML = heroTitle.replace("Hi", '<span class="text-accent-500">Hi</span>');
   dom.heroSubtitle.textContent = hero.subtitle || "";
-  dom.heroTags.innerHTML = tags.map((tag) => `<span>${tag}</span>`).join("\n");
+  dom.heroTags.innerHTML = tags
+    .map((tag) => `<span class="${pillClass}">${tag}</span>`)
+    .join("\n");
   dom.statusCard.innerHTML = `
-    <p class="eyebrow">${status.title}</p>
-    <p>${status.desc}</p>
-    <p class="muted">${status.location}</p>
+    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">${status.title}</p>
+    <p class="mt-2 text-base font-semibold text-slate-900 dark:text-white">${status.desc}</p>
+    <p class="text-sm text-slate-500 dark:text-slate-300">${status.location}</p>
   `;
 
   const phrases = tags.length ? [...tags] : ["Exploring new forms"];
@@ -171,13 +196,15 @@ function setupForm() {
 }
 
 function setupTheme() {
-  const saved = window.localStorage.getItem(THEME_KEY) || "dark";
-  if (saved === "light") document.body.classList.add("light");
-  dom.themeToggle.querySelector(".icon").textContent = saved === "light" ? "☀" : "☾";
+  const saved = window.localStorage.getItem(THEME_KEY);
+  const initial = saved || "light";
+  const root = document.documentElement;
+  root.classList.toggle("dark", initial === "dark");
+  dom.themeToggle.querySelector(".icon").textContent = initial === "light" ? "☀" : "☾";
 
   dom.themeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("light");
-    const next = document.body.classList.contains("light") ? "light" : "dark";
+    root.classList.toggle("dark");
+    const next = root.classList.contains("dark") ? "dark" : "light";
     window.localStorage.setItem(THEME_KEY, next);
     dom.themeToggle.querySelector(".icon").textContent = next === "light" ? "☀" : "☾";
   });

@@ -25,12 +25,15 @@ function persist() {
 
 function createInput(label, value, { multiline = false, type = "text", onChange, placeholder } = {}) {
   const wrapper = document.createElement("label");
+  wrapper.className = "flex flex-col gap-2 text-sm text-slate-500";
   const span = document.createElement("span");
   span.textContent = label;
   const field = multiline ? document.createElement("textarea") : document.createElement("input");
   field.value = value ?? "";
-  field.type = type;
+  if (!multiline) field.type = type;
   if (placeholder) field.placeholder = placeholder;
+  field.className =
+    "w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 text-slate-900 shadow-sm transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/15 dark:bg-slate-900/70 dark:text-white";
   field.addEventListener("input", (event) => onChange(event.target.value));
   wrapper.append(span, field);
   return wrapper;
@@ -38,9 +41,11 @@ function createInput(label, value, { multiline = false, type = "text", onChange,
 
 function createGroup(title) {
   const group = document.createElement("section");
-  group.className = "panel__group";
+  group.className =
+    "rounded-3xl border border-slate-200/60 bg-white/80 p-6 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/70";
   const heading = document.createElement("h3");
   heading.textContent = title;
+  heading.className = "text-xl font-semibold text-slate-900 dark:text-white mb-4";
   group.appendChild(heading);
   return group;
 }
@@ -98,15 +103,16 @@ function renderHeroPanel() {
 
 function makeRepeater(items, factory, addItem) {
   const container = document.createElement("div");
-  container.className = "repeaters";
+  container.className = "space-y-4";
   items.forEach((item, index) => container.appendChild(factory(item, index)));
 
   const actions = document.createElement("div");
-  actions.className = "repeater-actions";
+  actions.className = "flex justify-end gap-3 pt-2";
   const addButton = document.createElement("button");
+  addButton.className =
+    "inline-flex items-center rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5";
   addButton.type = "button";
   addButton.textContent = "新增";
-  addButton.className = "primary";
   addButton.addEventListener("click", addItem);
   actions.appendChild(addButton);
   container.appendChild(actions);
@@ -119,6 +125,8 @@ function renderStatsPanel() {
     content.stats,
     (stat, index) => {
       const item = document.createElement("article");
+      item.className =
+        "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
       item.append(
         createInput("标题", stat.title, {
           onChange: (value) => {
@@ -143,7 +151,8 @@ function renderStatsPanel() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "删除";
-      remove.className = "secondary";
+      remove.className =
+        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
       remove.addEventListener("click", () => {
         content.stats.splice(index, 1);
         persist();
@@ -168,6 +177,8 @@ function renderSkillsPanel() {
     content.skills,
     (skill, index) => {
       const item = document.createElement("article");
+      item.className =
+        "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
       item.append(
         createInput("名称", skill.title, {
           onChange: (value) => {
@@ -200,7 +211,8 @@ function renderSkillsPanel() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "删除";
-      remove.className = "secondary";
+      remove.className =
+        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
       remove.addEventListener("click", () => {
         content.skills.splice(index, 1);
         persist();
@@ -225,6 +237,8 @@ function renderTimelinePanel() {
     content.timeline,
     (timeline, index) => {
       const item = document.createElement("article");
+      item.className =
+        "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
       item.append(
         createInput("时间段", timeline.period, {
           onChange: (value) => {
@@ -249,7 +263,8 @@ function renderTimelinePanel() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "删除";
-      remove.className = "secondary";
+      remove.className =
+        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
       remove.addEventListener("click", () => {
         content.timeline.splice(index, 1);
         persist();
@@ -274,6 +289,8 @@ function renderProjectsPanel() {
     content.projects,
     (project, index) => {
       const item = document.createElement("article");
+      item.className =
+        "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
       item.append(
         createInput("名称", project.name, {
           onChange: (value) => {
@@ -310,7 +327,8 @@ function renderProjectsPanel() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "删除";
-      remove.className = "secondary";
+      remove.className =
+        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
       remove.addEventListener("click", () => {
         content.projects.splice(index, 1);
         persist();
@@ -335,6 +353,8 @@ function renderArticlesPanel() {
     content.articles,
     (article, index) => {
       const item = document.createElement("article");
+      item.className =
+        "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
       item.append(
         createInput("标题", article.title, {
           onChange: (value) => {
@@ -359,7 +379,8 @@ function renderArticlesPanel() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "删除";
-      remove.className = "secondary";
+      remove.className =
+        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
       remove.addEventListener("click", () => {
         content.articles.splice(index, 1);
         persist();
@@ -413,6 +434,8 @@ function renderContactPanel() {
     content.contact.socials,
     (social, index) => {
       const article = document.createElement("article");
+      article.className =
+        "rounded-2xl border border-dashed border-slate-200/70 bg-white/60 p-4 dark:border-white/20 dark:bg-slate-900/60";
       article.append(
         createInput("平台", social.label, {
           onChange: (value) => {
@@ -436,7 +459,8 @@ function renderContactPanel() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "删除";
-      remove.className = "secondary";
+      remove.className =
+        "inline-flex items-center rounded-full border border-slate-200/70 px-3 py-1 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white";
       remove.addEventListener("click", () => {
         content.contact.socials.splice(index, 1);
         persist();
@@ -462,7 +486,13 @@ function renderTabs() {
   tabs.forEach((tab) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = `tab${tab.id === activeTab ? " active" : ""}`;
+    const isActive = tab.id === activeTab;
+    button.className = [
+      "rounded-full px-5 py-2 text-sm font-semibold transition",
+      isActive
+        ? "bg-slate-900 text-white shadow-lg dark:bg-white dark:text-slate-900"
+        : "border border-slate-200/70 bg-white/70 text-slate-600 hover:-translate-y-0.5 dark:border-white/15 dark:bg-transparent dark:text-slate-200"
+    ].join(" ");
     button.textContent = tab.label;
     button.addEventListener("click", () => {
       activeTab = tab.id;
