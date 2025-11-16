@@ -7,14 +7,14 @@ const THEME_KEY = "portfolio.theme";
 const dom = {
   heroTitle: document.getElementById("heroTitle"),
   heroSubtitle: document.getElementById("heroSubtitle"),
-  heroTags: document.getElementById("heroTags"),
-  statGrid: document.getElementById("statGrid"),
-  skillGrid: document.getElementById("skillGrid"),
-  timelineList: document.getElementById("timelineList"),
-  projectGrid: document.getElementById("projectGrid"),
-  articleList: document.getElementById("articleList"),
+  heroMarquee: document.getElementById("heroMarquee"),
+  heroShots: document.getElementById("heroShots"),
+  metricGrid: document.getElementById("metricGrid"),
+  capabilityGrid: document.getElementById("capabilityGrid"),
+  storyRail: document.getElementById("storyRail"),
+  projectGallery: document.getElementById("projectGallery"),
+  articleGrid: document.getElementById("articleGrid"),
   contactInfo: document.getElementById("contactInfo"),
-  statusCard: document.getElementById("statusCard"),
   contactForm: document.getElementById("contactForm"),
   themeToggle: document.getElementById("themeToggle")
 };
@@ -22,74 +22,93 @@ const dom = {
 const content = getContent();
 const safe = (value) => (Array.isArray(value) ? value : []);
 
-const cardShell =
-  "glass-panel rounded-3xl border border-white/60 dark:border-white/10 p-6 shadow-xl transition hover:-translate-y-1 hover:shadow-2xl";
-const pillClass =
-  "inline-flex items-center rounded-full border border-white/40 bg-white/80 px-4 py-1 text-sm font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-800/70 dark:text-slate-100";
+const gradients = [
+  "linear-gradient(135deg, #020617, #312e81)",
+  "linear-gradient(135deg, #0f172a, #9333ea)",
+  "linear-gradient(135deg, #111827, #2563eb)",
+  "linear-gradient(135deg, #1f2937, #0ea5e9)",
+  "linear-gradient(135deg, #0f172a, #22d3ee)"
+];
 
-function createStatCard(stat) {
+const projectGradients = [
+  "linear-gradient(140deg, #111827, #312e81)",
+  "linear-gradient(140deg, #0f172a, #14b8a6)",
+  "linear-gradient(140deg, #1c1917, #f97316)",
+  "linear-gradient(140deg, #0f172a, #6366f1)"
+];
+
+function createHeroShot(entry, index) {
   const card = document.createElement("article");
-  card.className = `${cardShell} flex flex-col gap-2`;
+  card.className = "hero-shot";
+  card.style.setProperty("--shadow", "0 25px 70px rgba(15,15,15,0.3)");
+  card.style.background = gradients[index % gradients.length];
   card.dataset.reveal = "false";
   card.innerHTML = `
-    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">${stat.title}</p>
-    <p class="text-4xl font-semibold text-slate-900 dark:text-white">${stat.value}</p>
-    <p class="text-base text-slate-500 dark:text-slate-300">${stat.desc}</p>
+    <p class="text-xs font-semibold uppercase tracking-[0.4em] text-white/70">${entry.label}</p>
+    <p class="hero-shot__title">${entry.title}</p>
+    <p class="hero-shot__meta">${entry.desc}</p>
+    <p class="mt-4 text-sm text-white/80">${entry.meta || ""}</p>
   `;
   return card;
 }
 
-function createSkillCard(skill) {
+function createMetricPill(stat) {
+  const pill = document.createElement("div");
+  pill.className = "metric-pill flex-1 min-w-[240px]";
+  pill.dataset.reveal = "false";
+  pill.innerHTML = `
+    <span class="text-xs uppercase tracking-[0.4em] text-slate-500">${stat.title}</span>
+    <span class="text-3xl font-semibold">${stat.value}</span>
+    <span class="text-sm text-slate-500">${stat.desc}</span>
+  `;
+  return pill;
+}
+
+function createCapabilityCard(skill) {
+  const card = document.createElement("article");
+  card.className = "rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-panel dark:border-white/10 dark:bg-black/40";
+  card.dataset.reveal = "false";
   const highlights = safe(skill.highlights)
-    .map((tag) => `<span class="${pillClass} bg-slate-100/60 dark:bg-slate-800">${tag}</span>`)
+    .map((tag) => `<span class="rounded-full border border-black/10 px-3 py-1 text-xs uppercase tracking-[0.25em] text-slate-500 dark:border-white/20 dark:text-white/70">${tag}</span>`)
     .join("\n");
-  const card = document.createElement("article");
-  card.className = `${cardShell} flex flex-col gap-4`;
-  card.dataset.reveal = "false";
   card.innerHTML = `
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">能力指数</p>
-      <h3 class="text-xl font-semibold">${skill.title}</h3>
-      <p class="text-slate-500 dark:text-slate-300">${skill.desc}</p>
+    <div class="flex items-baseline justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-[0.4em] text-slate-500">Capability</p>
+        <h3 class="text-2xl font-semibold">${skill.title}</h3>
+      </div>
+      <span class="text-4xl font-semibold text-slate-900 dark:text-white">${skill.score}</span>
     </div>
-    <div class="h-2 rounded-full bg-slate-200/60 dark:bg-slate-800/70">
-      <span class="block h-full rounded-full bg-gradient-to-r from-brand-500 via-indigo-400 to-accent-500" style="width:${skill.score}%"></span>
-    </div>
-    <div class="flex flex-wrap gap-2 text-sm">${highlights}</div>
+    <p class="mt-3 text-slate-500 dark:text-slate-300">${skill.desc}</p>
+    <div class="mt-4 flex flex-wrap gap-2">${highlights}</div>
   `;
   return card;
 }
 
-function createTimelineItem(item) {
-  const container = document.createElement("article");
-  container.className = `${cardShell} grid gap-4 md:grid-cols-[140px,1fr]`;
-  container.dataset.reveal = "false";
-  container.innerHTML = `
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">${item.period}</p>
-    </div>
-    <div>
-      <h3 class="text-xl font-semibold">${item.role}</h3>
-      <p class="text-slate-500 dark:text-slate-300">${item.detail}</p>
-    </div>
+function createStoryEntry(item) {
+  const entry = document.createElement("article");
+  entry.className = "flex flex-col gap-1 border-b border-black/5 pb-5 last:border-b-0 last:pb-0 dark:border-white/10";
+  entry.dataset.reveal = "false";
+  entry.innerHTML = `
+    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">${item.period}</p>
+    <h3 class="text-2xl font-semibold">${item.role}</h3>
+    <p class="text-slate-500 dark:text-slate-300">${item.detail}</p>
   `;
-  return container;
+  return entry;
 }
 
-function createProjectCard(project) {
+function createProjectPanel(project, index) {
   const card = document.createElement("article");
-  card.className = `${cardShell} cursor-pointer`;
+  card.className = "project-panel";
+  card.style.background = projectGradients[index % projectGradients.length];
   card.dataset.reveal = "false";
   card.innerHTML = `
-    <div class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">${project.metrics}</div>
-    <h3 class="mt-2 text-2xl font-semibold">${project.name}</h3>
-    <p class="mt-2 text-slate-500 dark:text-slate-300">${project.desc}</p>
-    <div class="mt-4 flex flex-wrap gap-2 text-sm">
-      ${project.tech
-        .map(
-          (t) =>
-            `<span class="rounded-full bg-slate-100/70 px-3 py-1 text-slate-600 dark:bg-slate-800/80 dark:text-slate-200">${t}</span>`
-        )
+    <p class="text-xs uppercase tracking-[0.4em] text-white/60">${project.metrics}</p>
+    <h3 class="mt-3 text-3xl font-semibold">${project.name}</h3>
+    <p class="mt-3 text-white/80">${project.desc}</p>
+    <div class="mt-4 flex flex-wrap gap-2 text-sm text-white/80">
+      ${safe(project.tech)
+        .map((t) => `<span class="rounded-full border border-white/30 px-3 py-1">${t}</span>`)
         .join("\n")}
     </div>
   `;
@@ -101,13 +120,13 @@ function createProjectCard(project) {
 
 function createArticleCard(article) {
   const card = document.createElement("article");
-  card.className = `${cardShell} space-y-3`;
+  card.className = "article-card";
   card.dataset.reveal = "false";
   card.innerHTML = `
-    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">INSIGHT</p>
+    <p class="text-xs uppercase tracking-[0.4em] text-slate-500">Insight</p>
     <h3 class="text-xl font-semibold">${article.title}</h3>
     <p class="text-slate-500 dark:text-slate-300">${article.summary}</p>
-    <a class="inline-flex items-center text-brand-600 hover:text-brand-500" href="${article.link}" target="_blank" rel="noopener">阅读全文 →</a>
+    <a class="inline-flex items-center gap-1 text-slate-900 underline-offset-4 hover:underline dark:text-white" href="${article.link}" target="_blank" rel="noopener">阅读全文</a>
   `;
   return card;
 }
@@ -115,69 +134,61 @@ function createArticleCard(article) {
 function renderContact(contactRaw) {
   const contact = contactRaw || { city: "", email: "", wechat: "", calendly: "", socials: [] };
   dom.contactInfo.dataset.reveal = "false";
-  const socials = safe(contact.socials);
+  const socials = safe(contact.socials)
+    .map(
+      (item) =>
+        `<li class="flex items-center justify-between border-b border-black/5 py-2 text-sm dark:border-white/10"><span class="text-slate-500">${item.label}</span><a class="font-semibold text-slate-900 dark:text-white" target="_blank" href="${item.url}">${item.handle}</a></li>`
+    )
+    .join("");
   dom.contactInfo.innerHTML = `
-    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Base</p>
-    <h3 class="text-2xl font-semibold">${contact.city || ""}</h3>
-    <div class="space-y-3 text-sm">
-      <div class="flex items-center justify-between gap-4">
-        <span class="text-slate-500">Mail</span><a class="font-semibold text-brand-600" href="mailto:${contact.email || ""}">${contact.email || ""}</a>
-      </div>
-      <div class="flex items-center justify-between gap-4">
-        <span class="text-slate-500">WeChat</span><span class="font-semibold">${contact.wechat || ""}</span>
-      </div>
-      <div class="flex items-center justify-between gap-4">
-        <span class="text-slate-500">预约沟通</span><a class="font-semibold text-brand-600" target="_blank" href="${contact.calendly || "#"}">${contact.calendly || ""}</a>
-      </div>
-      ${socials
-        .map(
-          (item) => `
-            <div class="flex items-center justify-between gap-4">
-              <span class="text-slate-500">${item.label}</span>
-              <a class="font-semibold text-brand-600" target="_blank" href="${item.url}">${item.handle}</a>
-            </div>
-          `
-        )
-        .join("")}
+    <div class="rounded-[28px] border border-black/5 bg-white/80 p-6 shadow-panel dark:border-white/10 dark:bg-black/40">
+      <p class="text-xs uppercase tracking-[0.4em] text-slate-500">Base</p>
+      <h3 class="text-2xl font-semibold">${contact.city || ""}</h3>
+      <ul class="mt-4 space-y-2 text-sm">
+        <li class="flex items-center justify-between"><span class="text-slate-500">Mail</span><a class="font-semibold text-slate-900 dark:text-white" href="mailto:${contact.email || ""}">${contact.email || ""}</a></li>
+        <li class="flex items-center justify-between"><span class="text-slate-500">WeChat</span><span class="font-semibold">${contact.wechat || ""}</span></li>
+        <li class="flex items-center justify-between"><span class="text-slate-500">预约</span><a class="font-semibold text-slate-900 dark:text-white" target="_blank" href="${contact.calendly || "#"}">${contact.calendly || ""}</a></li>
+      </ul>
+      <ul class="mt-4 space-y-1">${socials}</ul>
     </div>
   `;
 }
 
-function initHero(hero) {
-  const heroTitle = hero.title || "你好，我是Guobin";
-  const tags = safe(hero.tags);
-  const status = hero.status || { title: "Focus", desc: "", location: "" };
-  dom.heroTitle.innerHTML = heroTitle.replace("Hi", '<span class="text-accent-500">Hi</span>');
+function renderHero(hero) {
+  const title = hero.title || "你好，我是Guobin";
+  dom.heroTitle.innerHTML = title.replace("Hi", '<span class="text-slate-400">Hi</span>');
   dom.heroSubtitle.textContent = hero.subtitle || "";
-  dom.heroTags.innerHTML = tags
-    .map((tag) => `<span class="${pillClass}">${tag}</span>`)
-    .join("\n");
-  dom.statusCard.innerHTML = `
-    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">${status.title}</p>
-    <p class="mt-2 text-base font-semibold text-slate-900 dark:text-white">${status.desc}</p>
-    <p class="text-sm text-slate-500 dark:text-slate-300">${status.location}</p>
-  `;
 
-  const phrases = tags.length ? [...tags] : ["Exploring new forms"];
-  let idx = 0;
-  const statusText = dom.statusCard.querySelector("p:nth-child(2)");
-  if (!statusText) return;
+  const tags = safe(hero.tags);
+  const marqueeItems = [...tags, ...tags].map((tag) => `<span class="marquee-pill">${tag}</span>`).join("\n");
+  dom.heroMarquee.innerHTML = marqueeItems;
 
-  setInterval(() => {
-    idx = (idx + 1) % phrases.length;
-    dom.statusCard.classList.add("shimmer");
-    statusText.textContent = phrases[idx];
-    setTimeout(() => dom.statusCard.classList.remove("shimmer"), 600);
-  }, 3200);
+  const projects = safe(content.projects);
+  const heroShotsData = [
+    {
+      label: hero.status?.title || "Focus",
+      title: hero.status?.desc || hero.title || "Creating beautiful systems",
+      desc: hero.status?.location || hero.subtitle || "",
+      meta: "Current"
+    },
+    ...projects.slice(0, 2).map((project) => ({
+      label: project.metrics,
+      title: project.name,
+      desc: project.desc,
+      meta: safe(project.tech).join(" · ")
+    }))
+  ];
+  const heroCards = heroShotsData.map(createHeroShot);
+  dom.heroShots?.replaceChildren(...heroCards);
 }
 
 function render() {
-  initHero(content.hero);
-  dom.statGrid.replaceChildren(...safe(content.stats).map(createStatCard));
-  dom.skillGrid.replaceChildren(...safe(content.skills).map(createSkillCard));
-  dom.timelineList.replaceChildren(...safe(content.timeline).map(createTimelineItem));
-  dom.projectGrid.replaceChildren(...safe(content.projects).map(createProjectCard));
-  dom.articleList.replaceChildren(...safe(content.articles).map(createArticleCard));
+  renderHero(content.hero);
+  dom.metricGrid.replaceChildren(...safe(content.stats).map(createMetricPill));
+  dom.capabilityGrid.replaceChildren(...safe(content.skills).map(createCapabilityCard));
+  dom.storyRail.replaceChildren(...safe(content.timeline).map(createStoryEntry));
+  dom.projectGallery.replaceChildren(...safe(content.projects).map(createProjectPanel));
+  dom.articleGrid.replaceChildren(...safe(content.articles).map(createArticleCard));
   renderContact(content.contact);
   document.getElementById("year").textContent = new Date().getFullYear();
   attachReveal();
@@ -189,7 +200,7 @@ function setupForm() {
     event.preventDefault();
     const data = new FormData(dom.contactForm);
     const subject = encodeURIComponent(`来自 ${data.get("name")} 的合作意向`);
-    const body = encodeURIComponent(`${data.get("message")}\n— ${data.get("email")}`);
+    const body = encodeURIComponent(`${data.get("message")}` + `\n— ${data.get("email")}`);
     window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
     dom.contactForm.reset();
   });
@@ -198,13 +209,12 @@ function setupForm() {
 function setupTheme() {
   const saved = window.localStorage.getItem(THEME_KEY);
   const initial = saved || "light";
-  const root = document.documentElement;
-  root.classList.toggle("dark", initial === "dark");
+  document.documentElement.classList.toggle("dark", initial === "dark");
   dom.themeToggle.querySelector(".icon").textContent = initial === "light" ? "☀" : "☾";
 
   dom.themeToggle.addEventListener("click", () => {
-    root.classList.toggle("dark");
-    const next = root.classList.contains("dark") ? "dark" : "light";
+    document.documentElement.classList.toggle("dark");
+    const next = document.documentElement.classList.contains("dark") ? "dark" : "light";
     window.localStorage.setItem(THEME_KEY, next);
     dom.themeToggle.querySelector(".icon").textContent = next === "light" ? "☀" : "☾";
   });
