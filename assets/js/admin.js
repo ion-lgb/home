@@ -121,6 +121,12 @@ function renderHeroPanel() {
         persist();
       }
     }),
+    createInput("封面图 URL", content.hero.cover || "", {
+      onChange: (value) => {
+        content.hero.cover = value;
+        persist();
+      }
+    }),
     createInput("标签（逗号分隔）", content.hero.tags.join(", "), {
       multiline: true,
       onChange: (value) => {
@@ -381,6 +387,12 @@ function renderProjectsPanel() {
             persist();
           }
         }),
+        createInput("封面图 URL", project.cover || "", {
+          onChange: (value) => {
+            content.projects[index].cover = value;
+            persist();
+          }
+        }),
         createInput("技术栈（逗号）", project.tech.join(", "), {
           onChange: (value) => {
             content.projects[index].tech = value.split(",").map((v) => v.trim()).filter(Boolean);
@@ -413,7 +425,7 @@ function renderProjectsPanel() {
       return item;
     },
     () => {
-      content.projects.push({ name: "", desc: "", metrics: "", tech: [], link: "" });
+      content.projects.push({ name: "", desc: "", metrics: "", tech: [], link: "", cover: "" });
       persist();
       renderProjectsPanel();
     }

@@ -22,14 +22,6 @@ const dom = {
 const content = getContent();
 const safe = (value) => (Array.isArray(value) ? value : []);
 
-const gradients = [
-  "linear-gradient(135deg, #020617, #312e81)",
-  "linear-gradient(135deg, #0f172a, #9333ea)",
-  "linear-gradient(135deg, #111827, #2563eb)",
-  "linear-gradient(135deg, #1f2937, #0ea5e9)",
-  "linear-gradient(135deg, #0f172a, #22d3ee)"
-];
-
 const projectGradients = [
   "linear-gradient(140deg, #111827, #312e81)",
   "linear-gradient(140deg, #0f172a, #14b8a6)",
@@ -41,13 +33,21 @@ function createHeroShot(entry, index) {
   const card = document.createElement("article");
   card.className = "hero-shot";
   card.style.setProperty("--shadow", "0 25px 70px rgba(15,15,15,0.3)");
-  card.style.background = gradients[index % gradients.length];
   card.dataset.reveal = "false";
+  const mediaContent = entry.cover
+    ? `<img src="${entry.cover}" alt="${entry.title}" loading="lazy" />`
+    : `<div class="hero-shot__media-placeholder" style="background:${projectGradients[index % projectGradients.length]}"></div>`;
   card.innerHTML = `
-    <p class="text-xs font-semibold uppercase tracking-[0.4em] text-white/70">${entry.label}</p>
-    <p class="hero-shot__title">${entry.title}</p>
-    <p class="hero-shot__meta">${entry.desc}</p>
-    <p class="mt-4 text-sm text-white/80">${entry.meta || ""}</p>
+    <div class="hero-shot__media">
+      ${mediaContent}
+      <div class="hero-shot__overlay"></div>
+    </div>
+    <div class="hero-shot__body">
+      <p class="text-xs font-semibold uppercase tracking-[0.4em] text-white/70">${entry.label}</p>
+      <p class="hero-shot__title">${entry.title}</p>
+      <p class="hero-shot__meta">${entry.desc}</p>
+      <p class="mt-4 text-sm text-white/80">${entry.meta || ""}</p>
+    </div>
   `;
   return card;
 }
@@ -100,9 +100,15 @@ function createStoryEntry(item) {
 function createProjectPanel(project, index) {
   const card = document.createElement("article");
   card.className = "project-panel";
-  card.style.background = projectGradients[index % projectGradients.length];
+  if (project.cover) {
+    card.innerHTML = `<img src="${project.cover}" alt="${project.name}" loading="lazy" />`;
+  } else {
+    card.style.background = projectGradients[index % projectGradients.length];
+  }
   card.dataset.reveal = "false";
-  card.innerHTML = `
+  const body = document.createElement("div");
+  body.className = "project-panel__body";
+  body.innerHTML = `
     <p class="text-xs uppercase tracking-[0.4em] text-white/60">${project.metrics}</p>
     <h3 class="mt-3 text-3xl font-semibold">${project.name}</h3>
     <p class="mt-3 text-white/80">${project.desc}</p>
@@ -112,6 +118,7 @@ function createProjectPanel(project, index) {
         .join("\n")}
     </div>
   `;
+  card.appendChild(body);
   card.addEventListener("click", () => {
     if (project.link) window.open(project.link, "_blank");
   });
@@ -164,18 +171,21 @@ function renderHero(hero) {
   dom.heroMarquee.innerHTML = marqueeItems;
 
   const projects = safe(content.projects);
+  const fallbackCover = hero.cover || safe(content.projects)[0]?.cover || "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80";
   const heroShotsData = [
     {
       label: hero.status?.title || "Focus",
       title: hero.status?.desc || hero.title || "Creating beautiful systems",
       desc: hero.status?.location || hero.subtitle || "",
-      meta: "Current"
+      meta: "Current",
+      cover: fallbackCover
     },
     ...projects.slice(0, 2).map((project) => ({
       label: project.metrics,
       title: project.name,
       desc: project.desc,
-      meta: safe(project.tech).join(" · ")
+      meta: safe(project.tech).join(" · "),
+      cover: project.cover || fallbackCover
     }))
   ];
   const heroCards = heroShotsData.map(createHeroShot);

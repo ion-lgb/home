@@ -5,6 +5,7 @@ const defaultContent = {
     title: "Hi,我是李国斌",
     subtitle: "全链路创意开发者，探索技术与体验设计的交汇点，持续交付优雅的数字产品",
     tags: ["全栈工程师", "体验设计", "增长实验", "AIGC"],
+    cover: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=1600&q=80",
     status: {
       title: "Current focus",
       desc: "打造多端一体的体验平台 · 主导AI协作设计系统",
@@ -66,6 +67,7 @@ const defaultContent = {
       desc: "面向创意团队的AI协作平台，提供Prompt设计、模型调参与多端预览。",
       metrics: "↑34% 设计交付效率",
       tech: ["Next.js", "tRPC", "Supabase"],
+      cover: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80",
       link: "https://example.com"
     },
     {
@@ -73,6 +75,7 @@ const defaultContent = {
       desc: "SaaS企业实时可观测大屏，内置可视化方案市场，支持多主题与剧本。",
       metrics: "↑240% 数据洞察速度",
       tech: ["Vue3", "ECharts", "Vite"],
+      cover: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
       link: "https://example.com"
     },
     {
@@ -80,6 +83,7 @@ const defaultContent = {
       desc: "覆盖Web/移动/IoT的设计系统，提供代码与视觉双栈资产管理。",
       metrics: "↓45% UI迭代成本",
       tech: ["Storybook", "Astro", "TailwindCSS"],
+      cover: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80",
       link: "https://example.com"
     }
   ],
