@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,94 +11,244 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./assets/css/main.css" />
-  </head>
-  <body>
-    <canvas id="heroParticles" aria-hidden="true"></canvas>
-    <div class="theme-toggle" id="themeToggle" title="切换主题">
-      <span class="icon">☾</span>
-    </div>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Space Grotesk", "Inter", "PingFang SC", "system-ui", "sans-serif"]
+            },
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                200: "#c7d2fe",
+                300: "#a5b4fc",
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca"
+              },
+              accent: {
+                400: "#fb923c",
+                500: "#f97316"
+              }
+            },
+            boxShadow: {
+              glow: "0 20px 80px rgba(99,102,241,.35)"
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Space Grotesk", "Inter", "PingFang SC", system-ui, sans-serif;
+        background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.18), transparent 40%),
+          radial-gradient(circle at 90% 30%, rgba(248, 113, 113, 0.25), transparent 45%),
+          radial-gradient(circle at 20% 80%, rgba(45, 212, 191, 0.2), transparent 40%),
+          linear-gradient(180deg, #f8fafc, #eef2ff);
+      }
 
-    <main id="app" class="page">
-      <header class="hero" id="hero">
-        <div class="hero__content">
-          <p class="hero__eyebrow">Creative Developer · Full Stack</p>
-          <h1 id="heroTitle"></h1>
-          <p id="heroSubtitle"></p>
-          <div class="hero__cta">
-            <a class="btn primary" href="#projects">查看作品</a>
-            <a class="btn ghost" href="admin.html">快速管理后台</a>
+      .dark body {
+        background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.35), transparent 45%),
+          radial-gradient(circle at 80% 10%, rgba(24, 165, 222, 0.25), transparent 45%),
+          #030712;
+      }
+
+      #heroParticles {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .glass-panel {
+        backdrop-filter: blur(25px);
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .dark .glass-panel {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: rgba(148, 163, 184, 0.15);
+      }
+
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(35px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+
+      [data-reveal="true"] {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .shimmer {
+        background-image: linear-gradient(
+          120deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.7) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 300% 300%;
+        animation: shimmer 0.8s ease;
+      }
+
+      @keyframes shimmer {
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -200% 0;
+        }
+      }
+
+      @keyframes floaty {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .float-card {
+        animation: floaty 7s ease-in-out infinite;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+    <canvas id="heroParticles" aria-hidden="true"></canvas>
+    <button
+      id="themeToggle"
+      class="fixed right-6 top-6 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-white/50 bg-white/80 text-slate-600 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-800/80 dark:text-slate-200"
+      title="切换主题"
+      type="button"
+    >
+      <span class="icon text-xl">☾</span>
+    </button>
+
+    <main class="relative z-10 mx-auto flex max-w-6xl flex-col gap-16 px-6 pb-16 pt-16">
+      <header class="glass-panel grid gap-10 rounded-[40px] p-10 shadow-2xl">
+        <div class="space-y-6">
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">Creative Developer · Full Stack</p>
+          <h1 id="heroTitle" class="text-4xl font-semibold leading-tight text-slate-900 dark:text-white md:text-5xl"></h1>
+          <p id="heroSubtitle" class="text-lg text-slate-600 dark:text-slate-300"></p>
+          <div class="flex flex-wrap gap-4">
+            <a
+              class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-6 py-3 text-base font-semibold text-white shadow-glow transition hover:scale-105"
+              href="#projects"
+              >查看作品</a
+            >
+            <a
+              class="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-6 py-3 text-base font-semibold text-slate-700 backdrop-blur transition hover:-translate-y-1 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+              href="admin.html"
+              >快速管理后台</a
+            >
           </div>
-          <div class="hero__tags" id="heroTags"></div>
+          <div id="heroTags" class="flex flex-wrap gap-2"></div>
         </div>
-        <div class="hero__visual">
-          <div class="hero__orb"></div>
-          <div class="hero__card" id="statusCard"></div>
+        <div class="relative isolate grid place-items-center">
+          <div class="float-card h-80 w-80 rounded-[40px] bg-gradient-to-br from-brand-400/70 via-indigo-400/40 to-teal-300/50 blur-3xl opacity-70"></div>
+          <div
+            id="statusCard"
+            class="glass-panel absolute inset-auto z-10 w-full max-w-sm rounded-[28px] border border-white/20 bg-white/80 p-6 text-sm text-slate-600 shadow-2xl dark:bg-slate-900/80 dark:text-slate-300"
+          ></div>
         </div>
       </header>
 
-      <section class="section" id="stats">
-        <div class="section__header">
-          <p class="eyebrow">核心指标</p>
-          <h2>以数据说话</h2>
+      <section class="space-y-8" id="stats">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">核心指标</p>
+          <h2 class="text-3xl font-semibold">以数据说话</h2>
         </div>
-        <div class="grid" id="statGrid"></div>
+        <div class="grid gap-6 md:grid-cols-2" id="statGrid"></div>
       </section>
 
-      <section class="section" id="skills">
-        <div class="section__header">
-          <p class="eyebrow">专长领域</p>
-          <h2>跨栈能力矩阵</h2>
+      <section class="space-y-8" id="skills">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">专长领域</p>
+          <h2 class="text-3xl font-semibold">跨栈能力矩阵</h2>
         </div>
-        <div class="skill-grid" id="skillGrid"></div>
+        <div class="grid gap-6 md:grid-cols-2" id="skillGrid"></div>
       </section>
 
-      <section class="section" id="timeline">
-        <div class="section__header">
-          <p class="eyebrow">经验曲线</p>
-          <h2>把创意落地的旅程</h2>
+      <section class="space-y-8" id="timeline">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">经验曲线</p>
+          <h2 class="text-3xl font-semibold">把创意落地的旅程</h2>
         </div>
-        <div class="timeline" id="timelineList"></div>
+        <div class="grid gap-6" id="timelineList"></div>
       </section>
 
-      <section class="section" id="projects">
-        <div class="section__header">
-          <p class="eyebrow">精选案例</p>
-          <h2>打造有温度的产品</h2>
+      <section class="space-y-8" id="projects">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">精选案例</p>
+          <h2 class="text-3xl font-semibold">打造有温度的产品</h2>
         </div>
-        <div class="project-grid" id="projectGrid"></div>
+        <div class="grid gap-6 md:grid-cols-2" id="projectGrid"></div>
       </section>
 
-      <section class="section" id="articles">
-        <div class="section__header">
-          <p class="eyebrow">知识沉淀</p>
-          <h2>技术与设计的思考</h2>
+      <section class="space-y-8" id="articles">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">知识沉淀</p>
+          <h2 class="text-3xl font-semibold">技术与设计的思考</h2>
         </div>
-        <div class="article-list" id="articleList"></div>
+        <div class="grid gap-6" id="articleList"></div>
       </section>
 
-      <section class="section" id="contact">
-        <div class="section__header">
-          <p class="eyebrow">合作 & 联系</p>
-          <h2>保持灵感流动</h2>
+      <section class="space-y-8" id="contact">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">合作 & 联系</p>
+          <h2 class="text-3xl font-semibold">保持灵感流动</h2>
         </div>
-        <div class="contact-panel">
-          <div class="contact-panel__info" id="contactInfo"></div>
-          <form class="contact-panel__form" id="contactForm">
-            <input type="text" name="name" placeholder="你的名字" required />
-            <input type="email" name="email" placeholder="邮箱" required />
-            <textarea name="message" rows="4" placeholder="想聊点什么?" required></textarea>
-            <button type="submit" class="btn primary">快速投递</button>
+        <div class="grid gap-6 rounded-[32px] border border-slate-200/60 bg-white/70 p-8 shadow-xl backdrop-blur dark:border-white/10 dark:bg-slate-900/70" data-reveal="false">
+          <div id="contactInfo" class="space-y-4"></div>
+          <form id="contactForm" class="space-y-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="你的名字"
+              required
+              class="w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 text-slate-900 shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="邮箱"
+              required
+              class="w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 text-slate-900 shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            />
+            <textarea
+              name="message"
+              rows="4"
+              placeholder="想聊点什么?"
+              required
+              class="w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 text-slate-900 shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            ></textarea>
+            <button
+              type="submit"
+              class="w-full rounded-2xl bg-slate-900 py-3 text-lg font-semibold text-white shadow-lg transition hover:shadow-xl dark:bg-white dark:text-slate-900"
+            >
+              快速投递
+            </button>
           </form>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <p>© <span id="year"></span> Crafted by Guobin Li · Always shipping ideas ✦</p>
+    <footer class="pb-12 pt-4 text-center text-sm text-slate-500">
+      © <span id="year"></span> Crafted by Guobin Li · Always shipping ideas ✦
     </footer>
 
     <script type="module" src="./assets/js/main.js"></script>
