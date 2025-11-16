@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>内容管理后台 · Guobin Li</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/css/admin.css" />
+  </head>
+  <body>
+    <main class="admin">
+      <header class="admin__header">
+        <div>
+          <p class="eyebrow">实时同步到首页</p>
+          <h1>个人简历内容管理</h1>
+        </div>
+        <div class="admin__actions">
+          <a class="btn ghost" href="index.html">返回主页</a>
+          <button id="resetButton" class="btn danger">恢复默认</button>
+        </div>
+      </header>
+
+      <section class="admin__panel">
+        <div class="tabs" id="tabs"></div>
+        <div class="panel" id="panelContent"></div>
+      </section>
+    </main>
+
+    <template id="fieldTemplate">
+      <label>
+        <span></span>
+        <input />
+      </label>
+    </template>
+
+    <script type="module" src="./assets/js/admin.js"></script>
+  </body>
+</html>
