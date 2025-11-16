@@ -10,25 +10,22 @@
 - **零依赖部署**：纯静态资源，可直接丢到任何静态托管（Vercel、Netlify、OSS、GitHub Pages）。
 
 ## 🧱 技术栈
-- 原生 HTML5 + CSS3 + ES Modules
-- 自定义设计系统（Poppins / Space Grotesk 字体、渐变/玻璃风格）
+- 原生 HTML5 + ES Modules
+- Tailwind CSS CDN 配置（light/dark theme + 自定义 brand/accent palette）
 - Intersection Observer、Canvas 粒子背景、表单 mailto 集成
 
 ## 📁 项目结构
 ```
 .
-├── index.html           # 主页
-├── admin.html           # 管理后台
+├── index.html              # 主页，内置 Tailwind config / 自定义动效样式
+├── admin.html              # 管理后台，同样以 Tailwind Utility 编排
 └── assets
-    ├── css
-    │   ├── main.css     # 主页样式
-    │   └── admin.css    # 后台样式
     └── js
-        ├── main.js      # 主页渲染与交互
-        ├── admin.js     # 后台逻辑
+        ├── main.js         # 主页渲染与交互
+        ├── admin.js        # 后台逻辑
         ├── contentStore.js # 默认数据 & 本地存储
-        ├── particles.js # 背景粒子
-        └── reveal.js    # 滚动动画
+        ├── particles.js    # 背景粒子
+        └── reveal.js       # 滚动动画
 ```
 
 ## 🚀 快速开始
@@ -44,7 +41,7 @@
 
 ## 🛠 自定义建议
 - **文案/数据**：可在后台直接编辑，或修改 `assets/js/contentStore.js` 里的 `defaultContent` 默认数据。
-- **样式**：调整 `assets/css/*.css`，已采用 CSS variable 方便全局换色。
+- **样式**：Tailwind 通过 CDN 注入，可直接在 `index.html` / `admin.html` 的 `tailwind.config` 或 `<style>` 中修改品牌色、组件圆角等。
 - **表单**：目前使用 `mailto:`，可接入 Formspree/Supabase/自建服务来记录投递。
 - **动效**：`particles.js`、`reveal.js` 都是独立模块，可替换为更复杂的 WebGL/Lottie 动画。
 
