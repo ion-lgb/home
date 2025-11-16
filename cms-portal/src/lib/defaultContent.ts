@@ -1,11 +1,12 @@
-const STORAGE_KEY = "portfolio.content.v1";
+import { SiteContent } from "@/types/content";
 
-const defaultContent = {
+export const defaultContent: SiteContent = {
   hero: {
     title: "Hi,我是李国斌",
     subtitle: "全链路创意开发者，探索技术与体验设计的交汇点，持续交付优雅的数字产品",
     tags: ["全栈工程师", "体验设计", "增长实验", "AIGC"],
-    cover: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=1600&q=80",
+    cover:
+      "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=1600&q=80",
     status: {
       title: "Current focus",
       desc: "打造多端一体的体验平台 · 主导AI协作设计系统",
@@ -67,7 +68,8 @@ const defaultContent = {
       desc: "面向创意团队的AI协作平台，提供Prompt设计、模型调参与多端预览。",
       metrics: "↑34% 设计交付效率",
       tech: ["Next.js", "tRPC", "Supabase"],
-      cover: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80",
+      cover:
+        "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80",
       link: "https://example.com"
     },
     {
@@ -75,7 +77,8 @@ const defaultContent = {
       desc: "SaaS企业实时可观测大屏，内置可视化方案市场，支持多主题与剧本。",
       metrics: "↑240% 数据洞察速度",
       tech: ["Vue3", "ECharts", "Vite"],
-      cover: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
+      cover:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
       link: "https://example.com"
     },
     {
@@ -83,25 +86,26 @@ const defaultContent = {
       desc: "覆盖Web/移动/IoT的设计系统，提供代码与视觉双栈资产管理。",
       metrics: "↓45% UI迭代成本",
       tech: ["Storybook", "Astro", "TailwindCSS"],
-      cover: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80",
+      cover:
+        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80",
       link: "https://example.com"
     }
   ],
   articles: [
     {
       title: "在真实业务中落地AI设计助手",
-      link: "https://example.com/blog/ai-design",
-      summary: "拆解从Prompt到设计规范映射的流程与挑战。"
+      summary: "拆解从Prompt到设计规范映射的流程与挑战。",
+      link: "https://example.com/blog/ai-design"
     },
     {
       title: "打造高可用微前端：技术与治理",
-      link: "https://example.com/blog/microfrontend",
-      summary: "结合多个实际案例分享架构与运维经验。"
+      summary: "结合多个实际案例分享架构与运维经验。",
+      link: "https://example.com/blog/microfrontend"
     },
     {
       title: "体验拉通：产品与工程共创的节奏",
-      link: "https://example.com/blog/product",
-      summary: "从团队协作角度解析如何保持体验一致性。"
+      summary: "从团队协作角度解析如何保持体验一致性。",
+      link: "https://example.com/blog/product"
     }
   ],
   contact: {
@@ -116,46 +120,3 @@ const defaultContent = {
     ]
   }
 };
-
-function deepClone(data) {
-  return JSON.parse(JSON.stringify(data));
-}
-
-function mergeContent(base, patch) {
-  const result = deepClone(base);
-  if (!patch || typeof patch !== "object") return result;
-  const assign = (target, source) => {
-    Object.entries(source).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        target[key] = value;
-      } else if (value && typeof value === "object") {
-        target[key] = assign(target[key] || {}, value);
-      } else {
-        target[key] = value;
-      }
-    });
-    return target;
-  };
-  return assign(result, patch);
-}
-
-function getContent() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return deepClone(defaultContent);
-    return mergeContent(defaultContent, JSON.parse(raw));
-  } catch (err) {
-    console.warn("读取存储数据失败，已回退默认", err);
-    return deepClone(defaultContent);
-  }
-}
-
-function saveContent(content) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
-}
-
-function resetContent() {
-  window.localStorage.removeItem(STORAGE_KEY);
-}
-
-export { STORAGE_KEY, defaultContent, getContent, saveContent, resetContent, mergeContent };

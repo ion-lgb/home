@@ -1,6 +1,7 @@
-import { getContent } from "./contentStore.js";
+import { getContent, defaultContent, mergeContent, saveContent } from "./contentStore.js";
 import { initParticles } from "./particles.js";
 import { attachReveal } from "./reveal.js";
+import { fetchRemoteContent } from "./remoteSync.js";
 
 const THEME_KEY = "portfolio.theme";
 
@@ -19,7 +20,7 @@ const dom = {
   themeToggle: document.getElementById("themeToggle")
 };
 
-const content = getContent();
+let content = getContent();
 const safe = (value) => (Array.isArray(value) ? value : []);
 
 const projectGradients = [
@@ -230,10 +231,31 @@ function setupTheme() {
   });
 }
 
+function setupAdminShortcut() {
+  const secretChord = { ctrlKey: true, shiftKey: true, key: "A" };
+  window.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "a" && event.ctrlKey && event.shiftKey) {
+      event.preventDefault();
+      window.location.href = "admin.html";
+    }
+  });
+}
+
+async function hydrateRemoteContent() {
+  const remote = await fetchRemoteContent();
+  if (remote) {
+    content = mergeContent(defaultContent, remote);
+    saveContent(content);
+    render();
+  }
+}
+
 function init() {
   render();
   setupForm();
   setupTheme();
+  setupAdminShortcut();
+  hydrateRemoteContent();
   initParticles();
 }
 

@@ -1,4 +1,5 @@
-import { getContent, saveContent, resetContent, defaultContent } from "./contentStore.js";
+import { getContent, saveContent, resetContent, defaultContent, mergeContent } from "./contentStore.js";
+import { fetchRemoteContent, pushRemoteContent, isRemoteSyncEnabled } from "./remoteSync.js";
 
 const tabs = [
   { id: "hero", label: "Hero区域" },
@@ -21,8 +22,18 @@ const dom = {
   importBtn: document.getElementById("importButton")
 };
 
+const scheduleRemotePush = (() => {
+  let timer;
+  return () => {
+    if (!isRemoteSyncEnabled()) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => pushRemoteContent(content), 600);
+  };
+})();
+
 function persist() {
   saveContent(content);
+  scheduleRemotePush();
 }
 
 function createInput(label, value, { multiline = false, type = "text", onChange, placeholder } = {}) {
@@ -643,6 +654,7 @@ function importContentFlow() {
     content = getContent();
     renderPanel();
     alert("导入成功，已同步到本地存储。");
+    scheduleRemotePush();
   } catch (err) {
     alert("导入失败，请确认 JSON 格式正确。");
   }
@@ -651,5 +663,14 @@ function importContentFlow() {
 dom.exportBtn.addEventListener("click", exportContent);
 dom.importBtn.addEventListener("click", importContentFlow);
 
+async function hydrateRemoteContent() {
+  const remote = await fetchRemoteContent();
+  if (!remote) return;
+  content = mergeContent(defaultContent, remote);
+  saveContent(content);
+  renderPanel();
+}
+
 renderTabs();
 renderPanel();
+hydrateRemoteContent();
